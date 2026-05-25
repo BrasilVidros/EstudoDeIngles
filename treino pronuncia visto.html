@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treino de Pronúncia — Visto F1</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2340;
+    --blue: #1a4a8a;
+    --gold: #c9a84c;
+    --green: #1a5c2a;
+    --light: #f5f7fa;
+    --card: #ffffff;
+    --border: #dde3ee;
+    --text: #1a2035;
+    --muted: #7a8499;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--light); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: var(--navy);
+    padding: 28px 24px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: -40px;
+    width: 200px; height: 200px;
+    background: rgba(201,168,76,0.08);
+    border-radius: 50%;
+  }
+  .flag-row { font-size: 28px; margin-bottom: 8px; position: relative; z-index: 1; }
+  header h1 { font-family: 'DM Serif Display', serif; color: #fff; font-size: 1.5rem; position: relative; z-index: 1; margin-bottom: 4px; }
+  header p { color: var(--gold); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; position: relative; z-index: 1; }
+
+  .progress-bar-wrap { background: var(--border); height: 4px; width: 100%; }
+  .progress-bar-fill { height: 4px; background: var(--gold); transition: width 0.4s ease; }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 20px 16px 40px; }
+  .counter { text-align: center; font-size: 0.78rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
+
+  .card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 24px rgba(15,35,64,0.07); margin-bottom: 20px; }
+  .card-header { background: var(--navy); padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+  .badge { background: var(--gold); color: var(--navy); font-weight: 700; font-size: 0.78rem; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .card-header h2 { color: #fff; font-size: 0.9rem; font-weight: 500; line-height: 1.4; }
+  .card-body { padding: 20px; }
+
+  .section-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .section-label.pt { color: var(--blue); }
+  .section-label.en { color: var(--green); }
+
+  .text-pt { font-size: 0.88rem; color: #555; line-height: 1.6; background: #f0f4fb; padding: 12px 14px; border-radius: 10px; margin-bottom: 16px; border-left: 3px solid var(--blue); }
+  .text-en { font-size: 1.05rem; font-weight: 600; color: var(--navy); line-height: 1.6; background: #edf7f0; padding: 14px 16px; border-radius: 10px; margin-bottom: 16px; border-left: 3px solid var(--green); }
+  .tip { font-size: 0.78rem; color: var(--muted); font-style: italic; background: #fafafa; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 18px; }
+
+  .audio-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 18px; border-radius: 10px; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn:active { transform: scale(0.97); }
+  .btn-play { background: var(--green); color: #fff; flex: 1; }
+  .btn-play:hover { background: #14491f; }
+  .btn-play.speaking { background: #c0392b; animation: pulse 1s ease-in-out infinite; }
+  .btn-play:disabled { background: #aaa; cursor: not-allowed; animation: none; }
+  .btn-slow { background: var(--navy); color: #fff; flex: 1; }
+  .btn-slow:hover { background: #0a1828; }
+  .btn-slow:disabled { background: #aaa; cursor: not-allowed; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+  .check-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .check-row label { font-size: 0.82rem; color: var(--muted); cursor: pointer; user-select: none; }
+  .check-row input[type=checkbox] { cursor: pointer; accent-color: var(--green); width: 15px; height: 15px; }
+
+  .done-card { display: none; text-align: center; padding: 40px 20px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(15,35,64,0.07); }
+  .done-card.show { display: block; }
+  .done-emoji { font-size: 3rem; margin-bottom: 12px; }
+  .done-card h2 { font-family: 'DM Serif Display', serif; color: var(--navy); margin-bottom: 8px; }
+  .done-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+
+  .nav-row { display: flex; gap: 12px; align-items: center; }
+  .btn-nav { background: var(--card); color: var(--navy); border: 1.5px solid var(--border); flex: 1; padding: 12px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .btn-nav:hover { border-color: var(--blue); color: var(--blue); }
+  .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-all { background: var(--gold); color: var(--navy); border: none; padding: 12px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .btn-all:hover { background: #b8922a; }
+
+  .status { text-align: center; font-size: 0.78rem; color: var(--muted); margin-top: 14px; min-height: 18px; }
+  .status.active { color: var(--green); font-weight: 600; }
+  .status.error { color: #c0392b; font-weight: 600; }
+
+  .loading-bar {
+    display: none;
+    height: 3px;
+    background: linear-gradient(90deg, var(--green), var(--gold), var(--green));
+    background-size: 200% 100%;
+    animation: loading 1.2s linear infinite;
+    border-radius: 2px;
+    margin-bottom: 10px;
+  }
+  .loading-bar.show { display: block; }
+  @keyframes loading { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="flag-row">🇺🇸</div>
+  <h1>Treino de Pronúncia — Visto F1</h1>
+  <p>Voz Natural · ElevenLabs AI</p>
+</header>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+</div>
+
+<div class="container">
+  <div class="counter" id="counter">Pergunta 1 de 13</div>
+  <div class="loading-bar" id="loadingBar"></div>
+
+  <div class="card" id="mainCard">
+    <div class="card-header">
+      <div class="badge" id="badgeNum">01</div>
+      <h2 id="questionText"></h2>
+    </div>
+    <div class="card-body">
+      <div class="section-label pt">🇧🇷 Português</div>
+      <div class="text-pt" id="ptText"></div>
+
+      <div class="section-label en">🇺🇸 Sua resposta em inglês</div>
+      <div class="text-en" id="enText"></div>
+
+      <div class="tip" id="tipText"></div>
+
+      <div class="audio-controls">
+        <button class="btn btn-play" id="btnPlay" onclick="speakCurrent()">▶ Ouvir resposta</button>
+        <button class="btn btn-slow" id="btnSlow" onclick="speakCurrentSlow()">🐢 Devagar</button>
+      </div>
+
+      <div class="check-row">
+        <input type="checkbox" id="practiced" onchange="markPracticed(this)">
+        <label for="practiced">Já pratiquei esta resposta</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="done-card" id="doneCard">
+    <div class="done-emoji">🎉</div>
+    <h2>Treino completo!</h2>
+    <p>Você passou por todas as 13 perguntas.<br>Repita quantas vezes quiser.</p>
+    <button class="btn btn-play" style="max-width:220px;margin:0 auto;" onclick="restart()">↩ Recomeçar</button>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn-nav" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="btn-all" id="btnAll" onclick="playAll()">▶▶ Ouvir Todas</button>
+    <button class="btn-nav" id="btnNext" onclick="navigate(1)">Próxima →</button>
+  </div>
+
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+// ── ElevenLabs config ────────────────────────────────────────────
+const API_KEY = 'sk_de298658effdb57d07fcbd89b12e24f52a8aa8573740e45a';
+const VOICE_ID = 'EXAVITQu4vr4xnSDxMaL'; // Sarah — natural American female
+const MODEL   = 'eleven_turbo_v2_5';       // fastest + natural
+
+// ── Q&A data ─────────────────────────────────────────────────────
+const qa = [
+  { num:"01", q:"Podemos falar em inglês? / Can we speak in English?",
+    pt:"Meu inglês ainda é básico. Por isso escolhi fazer o intercâmbio — para desenvolver minha fluência e ganhar mais confiança.",
+    en:"My English is still basic. That's exactly why I'm going — to improve my fluency and confidence.",
+    tip:"💡 Seja honesto e fale com calma. O consulado entende que você está aprendendo." },
+  { num:"02", q:"Para onde você vai? / Where do you plan to travel?",
+    pt:"Dallas, Texas — 3 meses. Trabalho na Brasil Portas e quero ser gerente comercial: negociações internacionais, clientes e fornecedores estrangeiros.",
+    en:"Dallas, Texas. Three-month English program. I work at Brasil Portas and want to become sales manager — international clients, suppliers, and negotiations. English will directly increase my income.",
+    tip:"💡 Mencione: cidade, duração, empresa, cargo desejado e impacto na renda." },
+  { num:"04", q:"Por que estudar inglês? / Why study English?",
+    pt:"Trabalho na mesma empresa há 4 anos. Para ser gerente comercial preciso negociar com fornecedores como Zonle Doors e TATA Wooden Door.",
+    en:"I've worked at the same company for four years. To become sales manager, I need English for negotiations with suppliers like Zonle Doors and TATA Wooden Door. It could mean a seventy percent salary increase.",
+    tip:"💡 Citar fornecedores reais mostra que você pesquisou de verdade." },
+  { num:"05", q:"Por que não estudar no Brasil? / Why not study in Brazil?",
+    pt:"Já estudo 4 vezes por semana no Brasil, mas tenho dificuldade em conversação. A imersão nos EUA vai acelerar meu desenvolvimento.",
+    en:"I already study four times a week in Brazil. But I still struggle with speaking. Full immersion will help me improve much faster.",
+    tip:"💡 Mostrar que já estuda no Brasil é um ponto forte." },
+  { num:"06", q:"Planos ao retornar? / Plans when you return?",
+    pt:"Retorno ao meu trabalho e assumo o cargo de gerente comercial — negociações internacionais e contato com clientes estrangeiros.",
+    en:"Return to my job and become sales manager — international negotiations, foreign clients and suppliers. English will directly affect my income.",
+    tip:"💡 Sempre mostre que tem um motivo concreto para voltar ao Brasil." },
+  { num:"07", q:"O que te faz voltar? / What makes you return?",
+    pt:"Toda minha vida está no Brasil — meu trabalho, minha carreira. Trabalho na mesma empresa há 4 anos e quero crescer lá.",
+    en:"My entire life is in Brazil — my job, my career, my future. I've worked at the same company for four years. I have every reason to go back.",
+    tip:"💡 Transmita segurança. Não hesite — é a resposta mais importante." },
+  { num:"09", q:"Datas e período? / Dates and study period?",
+    pt:"3 meses. Chego em 01/08/2026, aulas de 03/08 a 22/10, retorno ao Brasil em 25/10.",
+    en:"Three months. I arrive on August first. Classes run from August third to October twenty-second. I return to Brazil on October twenty-fifth.",
+    tip:"💡 Memorize as datas com precisão — é básico e não pode errar." },
+  { num:"11", q:"O que espera aprender? / Expected outcomes?",
+    pt:"Melhorar conversação e compreensão — minhas maiores dificuldades. Quero conduzir reuniões e negociações com mais segurança.",
+    en:"Better speaking and listening — my biggest weaknesses. I want to lead meetings and negotiations with confidence.",
+    tip:"💡 Seja específico: diga speaking e listening, não só inglês em geral." },
+  { num:"12/13", q:"Finanças e custo de vida? / Finances and budget?",
+    pt:"Tenho reservas para os 3 meses — moradia, escola, alimentação, transporte, seguro: aproximadamente 6.570 dólares.",
+    en:"My savings cover all costs: housing, school, food, transport, and insurance — about six thousand five hundred seventy dollars for three months. This does not affect my finances in Brazil.",
+    tip:"💡 Ter o valor exato passa credibilidade e mostra planejamento." },
+  { num:"15/16", q:"Por que essa escola? / Why Excel English Institute?",
+    pt:"Pesquisei SSL e Ingles Sin Estres, mas escolhi a Excel English Institute pelo suporte, qualidade e anos no mercado.",
+    en:"I looked at Shepherd School of Language and Ingles Sin Estres. I chose Excel English Institute for its great support for international students, teaching quality, and many years in the market.",
+    tip:"💡 Citar escolas concorrentes mostra que você pesquisou seriamente." },
+  { num:"20", q:"Onde trabalha? / Where do you work?",
+    pt:"Brasil Portas — auxiliar administrativo nas áreas financeira, comercial e de marketing.",
+    en:"Brasil Portas — admin assistant in finance, sales, and marketing. English is key to becoming sales manager.",
+    tip:"💡 Mencionar as 3 áreas mostra que sua função é mais ampla que o cargo registrado." },
+  { num:"22", q:"Qual seu salário? / What is your salary?",
+    pt:"Salário registrado: R$2.520,56. Com atividades adicionais, minha renda média é de R$6.000,00 por mês.",
+    en:"My official salary is two thousand five hundred twenty reais. With extra work in sales and finance, my total income is about six thousand reais per month. It will increase after I become sales manager.",
+    tip:"💡 Explique a diferença entre salário registrado e renda real sem hesitar." },
+  { num:"23", q:"O que acontece com seu trabalho? / What happens to your job?",
+    pt:"Farei um afastamento temporário sem remuneração. A empresa apoia porque minha qualificação vai beneficiar os negócios.",
+    en:"I'll take a short unpaid leave. The company supports it — my English will help the business. When the course ends, I return to my normal job.",
+    tip:"💡 Deixe claro que o emprego está garantido ao voltar." }
+];
+
+// ── State ─────────────────────────────────────────────────────────
+let current    = 0;
+let practiced  = new Array(qa.length).fill(false);
+let isLoading  = false;
+let currentAudio = null;
+let playAllMode  = false;
+let playAllIdx   = 0;
+
+// ── ElevenLabs TTS ────────────────────────────────────────────────
+async function generateSpeech(text, stability = 0.5, similarity = 0.75) {
+  const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
+    method: 'POST',
+    headers: {
+      'xi-api-key': API_KEY,
+      'Content-Type': 'application/json',
+      'Accept': 'audio/mpeg'
+    },
+    body: JSON.stringify({
+      text,
+      model_id: MODEL,
+      voice_settings: { stability, similarity_boost: similarity, style: 0.2, use_speaker_boost: true }
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.detail?.message || `Erro ${resp.status}`);
+  }
+  const blob = await resp.blob();
+  return URL.createObjectURL(blob);
+}
+
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.src = '';
+    currentAudio = null;
+  }
+  playAllMode = false;
+  setLoading(false);
+  resetBtn();
+}
+
+function resetBtn() {
+  const btn = document.getElementById('btnPlay');
+  btn.classList.remove('speaking');
+  btn.textContent = '▶ Ouvir resposta';
+  btn.onclick = speakCurrent;
+  btn.disabled = false;
+  document.getElementById('btnSlow').disabled = false;
+  document.getElementById('btnAll').disabled = false;
+}
+
+function setLoading(on) {
+  isLoading = on;
+  document.getElementById('loadingBar').classList.toggle('show', on);
+  document.getElementById('btnPlay').disabled = on;
+  document.getElementById('btnSlow').disabled = on;
+}
+
+async function playSpeech(text, slow = false) {
+  stopAudio();
+  setLoading(true);
+  setStatus('⏳ Gerando áudio...', true);
+
+  try {
+    // slow: higher stability = more deliberate pacing
+    const stability   = slow ? 0.85 : 0.45;
+    const similarity  = slow ? 0.80 : 0.75;
+    const url = await generateSpeech(text, stability, similarity);
+    setLoading(false);
+
+    const audio = new Audio(url);
+    currentAudio = audio;
+
+    const btn = document.getElementById('btnPlay');
+    btn.classList.add('speaking');
+    btn.textContent = '⏹ Parar';
+    btn.onclick = stopAudio;
+
+    setStatus(slow ? '🐢 Reproduzindo devagar...' : '🔊 Reproduzindo voz natural...', true);
+
+    audio.playbackRate = slow ? 0.82 : 1.0;
+    audio.play();
+
+    audio.onended = () => {
+      URL.revokeObjectURL(url);
+      resetBtn();
+      if (playAllMode) {
+        playAllIdx++;
+        setTimeout(playNextAll, 1400);
+      } else {
+        setStatus('🗣 Agora repita em voz alta!', true);
+      }
+    };
+
+    audio.onerror = () => {
+      resetBtn();
+      setStatus('Erro ao reproduzir áudio.', false);
+    };
+
+  } catch (err) {
+    setLoading(false);
+    resetBtn();
+    setStatus('❌ Erro: ' + err.message, false);
+    document.getElementById('status').className = 'status error';
+  }
+}
+
+function speakCurrent()     { playAllMode = false; playSpeech(qa[current].en, false); }
+function speakCurrentSlow() { playAllMode = false; playSpeech(qa[current].en, true);  }
+
+// ── Play all ──────────────────────────────────────────────────────
+function playAll() {
+  stopAudio();
+  playAllMode = true;
+  playAllIdx  = current;
+  playNextAll();
+}
+
+function playNextAll() {
+  if (!playAllMode || playAllIdx >= qa.length) {
+    playAllMode = false;
+    setStatus('✓ Todas concluídas!', true);
+    return;
+  }
+  current = playAllIdx;
+  render(false);
+  setStatus(`🔊 Reproduzindo ${playAllIdx + 1} de ${qa.length}...`, true);
+  playSpeech(qa[current].en, false);
+}
+
+// ── Navigation ────────────────────────────────────────────────────
+function navigate(dir) {
+  stopAudio();
+  if (dir === 1 && current === qa.length - 1) {
+    document.getElementById('mainCard').style.display = 'none';
+    document.getElementById('doneCard').classList.add('show');
+    document.getElementById('progressBar').style.width = '100%';
+    return;
+  }
+  current = Math.max(0, Math.min(qa.length - 1, current + dir));
+  render();
+}
+
+function restart() { current = 0; render(); }
+
+// ── Render ────────────────────────────────────────────────────────
+function render(resetButton = true) {
+  const d = qa[current];
+  document.getElementById('badgeNum').textContent    = d.num;
+  document.getElementById('questionText').textContent = d.q;
+  document.getElementById('ptText').textContent       = d.pt;
+  document.getElementById('enText').textContent       = d.en;
+  document.getElementById('tipText').textContent      = d.tip;
+  document.getElementById('counter').textContent      = `Pergunta ${current + 1} de ${qa.length}`;
+  document.getElementById('practiced').checked        = practiced[current];
+  document.getElementById('progressBar').style.width  = ((current + 1) / qa.length * 100) + '%';
+  document.getElementById('btnPrev').disabled         = current === 0;
+  document.getElementById('btnNext').disabled         = current === qa.length - 1;
+  document.getElementById('mainCard').style.display   = 'block';
+  document.getElementById('doneCard').classList.remove('show');
+  if (resetButton) { resetBtn(); setStatus(''); }
+}
+
+function setStatus(msg, active = false) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className   = 'status' + (active ? ' active' : '');
+}
+
+function markPracticed(cb) {
+  practiced[current] = cb.checked;
+  const done = practiced.filter(Boolean).length;
+  setStatus(cb.checked ? `✓ ${done} de ${qa.length} perguntas praticadas` : '', cb.checked);
+}
+
+render();
+</script>
+</body>
+</html>
